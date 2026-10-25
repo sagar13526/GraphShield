@@ -1,17 +1,21 @@
-# GraphShield: Graph-Based UPI Fraud Detection
+# GraphShield: GNN-Based UPI Fraud Detection
 
-GraphShield is a student machine learning project that identifies potentially suspicious UPI-style accounts by analyzing the relationships between accounts and the transfers connecting them, using graph-based learning.
+GraphShield is a student machine learning project that uses a **Graph Neural Network (GraphSAGE)** to flag potentially suspicious UPI-style accounts by learning from the relationships between accounts and the transfers connecting them.
 
-The project uses **synthetic data** to demonstrate how a graph neural network (GraphSAGE) can help flag suspicious accounts, and compares it with a Logistic Regression baseline.
+The project runs on **synthetic data** and compares the GNN with a Logistic Regression baseline, with an interactive Streamlit dashboard to explore predictions, metrics and the transaction network.
+
+## Why a Graph Neural Network?
+
+Fraud rarely shows up in a single account in isolation. It shows up in *who an account sends money to and receives money from*. A standard model like Logistic Regression looks at each account's own features only. A GNN also aggregates information from an account's neighbors in the transaction graph, so it can use that network context when deciding whether an account looks suspicious.
 
 ## Features
 
-- Generates synthetic account and transfer data.
-- Represents accounts as nodes and transfers as edges in a graph.
-- Uses a GraphSAGE model for node classification (suspicious vs. normal account).
-- Compares the graph-based model with a Logistic Regression baseline.
+- Generates synthetic account and transfer data (fixed seed for reproducibility).
+- Represents accounts as nodes and transfers as edges in a transaction graph.
+- Trains a GraphSAGE GNN for node classification (suspicious vs. normal account).
+- Compares the GNN with a Logistic Regression baseline.
 - Reports ROC-AUC, Average Precision, Precision, Recall, F1-score and confusion matrices.
-- Provides an interactive dashboard built with Streamlit, including transaction network visualizations.
+- Provides an interactive Streamlit dashboard with transaction network visualizations.
 
 ## Technologies Used
 
@@ -51,16 +55,14 @@ GraphShield/
 
 ## How It Works
 
-1. **Data Generation:** Synthetic accounts and transfers are generated with a fixed random seed (42) for reproducibility.
-2. **Graph Construction:** Accounts become nodes and transfers become edges, forming a transaction graph.
-3. **Model Training:** A GraphSAGE model learns from each account's features and its neighborhood in the graph to classify the account as suspicious or normal.
-4. **Baseline Comparison:** A Logistic Regression model is trained as a baseline.
+1. **Data Generation:** Synthetic accounts and transfers are generated with a fixed random seed (42).
+2. **Graph Construction:** Accounts become nodes and transfers become edges.
+3. **GNN Training:** A GraphSAGE model learns from each account's features and its neighborhood in the graph to classify the account as suspicious or normal.
+4. **Baseline:** A Logistic Regression model is trained for comparison.
 5. **Evaluation:** Both models are evaluated on held-out test accounts.
-6. **Visualization:** The dashboard presents predictions, metrics and network plots.
+6. **Visualization:** The dashboard shows predictions, metrics and network plots.
 
 ## Dataset
-
-The project uses a fully synthetic dataset (seed = 42):
 
 | Item | Value |
 |---|---|
@@ -69,13 +71,13 @@ The project uses a fully synthetic dataset (seed = 42):
 | Fraudulent accounts | 48 (16%) |
 | Train / Validation / Test accounts | 180 / 60 / 60 |
 
-The task is **node classification**: each account is labeled as suspicious or not.
+The task is **node classification**: each account is labeled as suspicious or not. All data is synthetic.
 
 ## Results
 
 Evaluated on the 60 held-out test accounts (9 fraudulent) at a 0.5 decision threshold:
 
-| Metric | GraphSAGE | Logistic Regression |
+| Metric | GraphSAGE (GNN) | Logistic Regression |
 |---|---|---|
 | ROC-AUC | **0.980** | 0.967 |
 | Average Precision | **0.919** | 0.811 |
@@ -96,9 +98,9 @@ Evaluated on the 60 held-out test accounts (9 fraudulent) at a 0.5 decision thre
 
 ### Interpretation
 
-- GraphSAGE ranks suspicious accounts better (higher ROC-AUC and Average Precision) and raises fewer false alarms (5 vs. 11), which gives it a higher F1-score.
+- The GNN ranks suspicious accounts better (higher ROC-AUC and Average Precision) and raises fewer false alarms (5 vs. 11), giving it a higher F1-score.
 - Logistic Regression catches every fraudulent account in the test set, but flags 11 normal accounts to do so.
-- The test set is small (60 accounts, only 9 fraudulent), so a single account noticeably changes the metrics. These results show the approach works on this synthetic data; they do not prove GraphSAGE is reliably better than the baseline.
+- The test set is small (60 accounts, 9 fraudulent), so one account changes the metrics noticeably. These results show the approach works on this synthetic data; they do not prove the GNN is reliably better than the baseline.
 - Because the data is synthetic, scores reflect the patterns built into the data generator, not real-world fraud detection performance.
 
 ## Installation
@@ -164,13 +166,13 @@ Then start the dashboard again.
 ## Future Improvements
 
 - Evaluate on suitable real-world datasets where permitted.
-- Use larger transaction networks and multiple random seeds to report average results with variance.
+- Use larger transaction graphs and multiple random seeds to report average results with variance.
 - Add temporal graph features to capture changing fraud patterns over time.
 - Reimplement the model with a graph library such as PyTorch Geometric.
 - Add per-account explanations for why an account was flagged.
 
 ## Purpose
 
-GraphShield provides practical experience with synthetic data generation, graph construction, model training, baseline comparison and dashboard development for fraud detection.
+GraphShield provides practical experience with synthetic data generation, graph construction, GNN training, baseline comparison and dashboard development for fraud detection.
 
 **Note:** GraphShield is an educational project. It does not connect to a real UPI system or make decisions about actual financial transactions.
