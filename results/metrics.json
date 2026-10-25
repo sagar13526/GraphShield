@@ -1,0 +1,50 @@
+{
+  "project": "UPI Fraud Detection with GraphSAGE",
+  "dataset": {
+    "type": "synthetic",
+    "accounts": 300,
+    "transfers": 2344,
+    "fraud_accounts": 48,
+    "train_accounts": 180,
+    "validation_accounts": 60,
+    "test_accounts": 60,
+    "seed": 42
+  },
+  "graphsage": {
+    "model": "GraphSAGE",
+    "roc_auc": 0.9803921568627451,
+    "average_precision": 0.9194444444444445,
+    "precision_at_0_5": 0.6153846153846154,
+    "recall_at_0_5": 0.8888888888888888,
+    "f1_at_0_5": 0.7272727272727273,
+    "confusion_matrix_tn_fp_fn_tp": [
+      [
+        46,
+        5
+      ],
+      [
+        1,
+        8
+      ]
+    ]
+  },
+  "logistic_regression": {
+    "model": "Logistic Regression",
+    "roc_auc": 0.9673202614379086,
+    "average_precision": 0.811050061050061,
+    "precision_at_0_5": 0.45,
+    "recall_at_0_5": 1.0,
+    "f1_at_0_5": 0.6206896551724138,
+    "confusion_matrix_tn_fp_fn_tp": [
+      [
+        40,
+        11
+      ],
+      [
+        0,
+        9
+      ]
+    ]
+  },
+  "note": "Synthetic educational benchmark only; not validated for real payment systems."
+}
