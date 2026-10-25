@@ -1,115 +1,130 @@
-# GraphShield — UPI-Style Transaction Fraud Detection
+# GraphShield — Graph-Based UPI Fraud Detection
 
-GraphShield is an educational machine-learning project that explores how graph structure can help identify **simulated suspicious accounts** in a synthetic UPI-style transaction network. It includes a reproducible data generator, a simplified GraphSAGE-style PyTorch model, a Logistic Regression baseline, evaluation outputs, and an interactive Streamlit dashboard.
+GraphShield is a student machine learning project that identifies potentially suspicious UPI-style transactions by analyzing relationships between accounts and transactions using graph-based learning.
 
-> **Scope and safety:** This project uses synthetic data only. It is not connected to UPI, Visa, a bank, or any payment network. Scores are not validated for real-world use and must never be used to make actual payment decisions.
+The project uses synthetic transaction data to demonstrate how graph neural networks can help detect suspicious transaction patterns.
 
 ## Features
 
-- Generate a synthetic account graph and transfer records with simulated coordinated rings.
-- Engineer account-level activity features from incoming/outgoing transactions and counterparties.
-- Train a two-layer **GraphSAGE-style** neural network in PyTorch.
-- Compare against a Logistic Regression baseline.
-- Evaluate on a held-out test split using ROC-AUC, Average Precision, precision, recall, F1, and a confusion matrix.
-- Export metrics, test predictions, model weights, CSV data, and static plots.
-- Explore metrics, accounts, transaction links, and the graph in a Streamlit dashboard.
+- Generates synthetic account and transaction data.
+- Represents transaction relationships as a graph.
+- Uses a GraphSAGE-style graph learning model to classify suspicious transactions.
+- Compares the graph-based model with a Logistic Regression baseline.
+- Displays predictions, evaluation metrics, and transaction network visualizations.
+- Provides an interactive dashboard built with Streamlit.
 
-## Project structure
+## Technologies Used
+
+- Python
+- PyTorch
+- Scikit-learn
+- Pandas and NumPy
+- Matplotlib and NetworkX
+- Streamlit
+
+## Project Structure
 
 ```text
-GraphShield-UPI-Fraud-Detection/
-├── app.py                       # Interactive Streamlit dashboard
-├── run.bat                      # Generate data, train, and create plots
-├── run_dashboard.bat            # Launch the dashboard
-├── requirements.txt              # Python dependencies
-├── README.md                     # Project documentation
-├── LICENSE                      # MIT license
-├── .gitignore
-├── src/
-│   ├── generate_data.py          # Synthetic graph/data generator
-│   ├── model.py                  # GraphSAGE-style PyTorch model
-│   ├── train.py                  # Training, evaluation, and saved predictions
-│   ├── visualize.py              # Static plots
-│   └── main.py                   # Runs the full training pipeline
+GraphShield/
+├── app.py
+├── requirements.txt
+├── run.bat
+├── run_dashboard.bat
+├── README.md
 ├── data/
-│   ├── accounts.csv              # Account features and simulated labels
-│   ├── transactions.csv          # Synthetic directed transfers
-│   └── graph.npz                 # NumPy arrays used by the model
-└── results/
-    ├── metrics.json              # Measured metrics from the included run
-    ├── test_predictions.npz      # Test labels, scores, and account indices
-    ├── graphsage_model.pt        # Saved PyTorch model weights
-    ├── model_comparison.png      # Static model comparison plot
-    └── transaction_network.png   # Static network illustration
+│   ├── accounts.csv
+│   ├── transactions.csv
+│   └── graph.npz
+├── results/
+│   ├── graphsage_model.pt
+│   ├── metrics.json
+│   ├── model_comparison.png
+│   ├── test_predictions.npz
+│   └── transaction_network.png
+└── src/
+    ├── generate_data.py
+    ├── main.py
+    ├── model.py
+    ├── train.py
+    └── visualize.py
 ```
 
-The `*.npz` files are binary NumPy archives, not documents. Inspect them using Python/NumPy; open the CSV files in Excel or VS Code. The `.pt` file contains model weights and is not meant to be opened as text. All source code is in the human-readable `.py` files under `src/` and in `app.py`. You can ignore `__pycache__` if Python creates it when you run the project; it is generated automatically and is not included in this ZIP.
+## How It Works
 
-## Requirements
+1. **Data Generation:** Synthetic accounts and transactions are generated for the experiment.
+2. **Graph Construction:** Accounts and transaction relationships are represented as a graph.
+3. **Model Training:** A GraphSAGE-style model learns patterns from the graph to classify transactions.
+4. **Baseline Comparison:** Logistic Regression is used as a baseline model.
+5. **Evaluation:** The models are evaluated using classification metrics.
+6. **Visualization:** The dashboard presents results and transaction network visualizations.
 
-- Windows 10/11
-- Python 3.11 or newer (your installed Python must be supported by the PyTorch build pip installs)
-- Internet access for the first dependency installation
-- Approximately 1–2 GB free disk space is recommended for Python packages
+## Installation
 
-The pipeline uses PyTorch, NumPy, scikit-learn, and Matplotlib. The dashboard additionally uses Streamlit, Plotly, pandas, and NetworkX. `requirements.txt` installs all of them.
+### 1. Clone the Repository
 
-## Run on Windows
-
-1. Extract the ZIP completely.
-2. Open the extracted `GraphShield-UPI-Fraud-Detection` folder.
-3. Double-click **`run.bat`**. It installs/checks dependencies, regenerates synthetic data, trains both models, and creates the static plots.
-4. When it finishes, double-click **`run_dashboard.bat`**. The dashboard should open in your browser. If it does not, copy the local URL shown in the terminal (usually `http://localhost:8501`) into your browser.
-
-You can also open a terminal in the project folder and run:
-
-```bat
-python -m pip install -r requirements.txt
-python src\main.py
-python -m streamlit run app.py
+```bash
+git clone https://github.com/sagar13526/GraphShield.git
+cd GraphShield
 ```
 
-If the commands fail, keep the terminal open and copy the final error lines. Do not run the commands from the parent folder; run them from the folder that contains `run.bat` and `app.py`.
+### 2. Create a Virtual Environment (Recommended)
 
-## How the experiment works
-
-1. A seeded generator creates synthetic accounts, transfers, and coordinated simulated fraud rings.
-2. Features are computed from account transaction activity. The fraud label and ring ID are not included as input features.
-3. Account indices are divided into stratified training, validation, and test splits.
-4. A scaler is fit only on the training features and applied to the other splits.
-5. The GraphSAGE-style model combines each node's own features with mean-neighbor representations over the graph.
-6. Logistic Regression is trained as a feature-only baseline.
-7. Metrics are calculated on the held-out test accounts. The saved dashboard risk scores refer only to these test accounts.
-
-This is a **transductive educational setup**: the graph structure and unlabeled node features are available during message passing, while test labels are not used to train the model. This setup is not equivalent to a prospective, time-based evaluation of future transactions. Feature construction from the full generated transfer history can also make the task easier than a real deployment.
-
-## Understanding the outputs
-
-- **ROC-AUC:** ranking quality across classification thresholds.
-- **Average Precision:** precision-recall performance, useful when the positive class is less common.
-- **Precision / Recall / F1:** reported at a fixed probability threshold of 0.50.
-- **Confusion matrix:** true negatives, false positives, false negatives, and true positives on the test split.
-- **`data/graph.npz`:** arrays named `features`, `labels`, `edges`, `amounts`, and `ring_ids`.
-- **`results/test_predictions.npz`:** arrays named `y_true`, `graphsage`, `logistic_regression`, and `test_idx`.
-
-To inspect the graph archive from the project folder:
-
-```bat
-python -c "import numpy as np; d=np.load('data/graph.npz'); print(d.files); [print(k, d[k].shape, d[k].dtype) for k in d.files]"
+```bash
+python -m venv venv
 ```
 
-## Limitations and responsible use
+Activate it on Windows:
 
-- Synthetic fraud rings are simplified and may be easier to detect than real fraud.
-- The model is a simplified GraphSAGE-style implementation, not a production-ready fraud system.
-- The graph is evaluated transductively; there is no time-based holdout or real-world validation.
-- A fixed 0.50 threshold may not suit operational fraud review.
-- A real deployment would require approved data access, privacy and security controls, time-based testing, leakage checks, calibration, drift monitoring, explainability, and human review.
+```bash
+venv\Scripts\activate
+```
 
-## Resume wording
+### 3. Install Dependencies
 
-Use measured results from your own `results/metrics.json`, and describe the dataset honestly. For example:
+```bash
+pip install -r requirements.txt
+```
 
-> Built an educational GraphSAGE-style fraud-detection prototype on synthetic transaction graphs; engineered account-level activity features, compared against Logistic Regression, and evaluated with ROC-AUC, Average Precision, precision, recall, and F1.
+## Run the Project
 
-Do not claim that synthetic data came from Visa, UPI, or a bank, and do not present synthetic benchmark scores as real-world performance.
+To launch the dashboard, run:
+
+```bash
+streamlit run app.py
+```
+
+Alternatively, if the batch files are configured for your environment, you can use `run_dashboard.bat` or `run.bat`.
+
+If required data and model files are missing, run the relevant data-generation and training scripts in the `src` folder before launching the dashboard.
+
+## Model Evaluation
+
+GraphShield compares the graph-based model with Logistic Regression using classification metrics such as:
+
+- Accuracy
+- Precision
+- Recall
+- F1-score
+
+The project also includes visual comparisons and transaction network plots. Actual performance should be checked using the generated evaluation results.
+
+## Limitations
+
+- The project uses synthetic data, not real bank or UPI transaction records.
+- Its results do not establish real-world fraud detection performance.
+- The model is an educational prototype and is not intended for production banking systems.
+- Performance depends on the generated data, features, and training setup.
+
+## Future Improvements
+
+- Evaluate the model on suitable real-world datasets where permitted.
+- Improve graph features and model architecture.
+- Test the system on larger transaction networks.
+- Add more detailed transaction explanations and monitoring.
+- Explore methods for handling changing fraud patterns.
+
+## Purpose
+
+This project demonstrates the use of graph-based machine learning for transaction fraud detection and provides practical experience with data generation, model training, model comparison, and dashboard development.
+
+**Note:** GraphShield is an educational project. It does not connect to a real UPI system or make decisions about actual financial transactions.
